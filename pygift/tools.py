@@ -13,7 +13,7 @@ def version_commit(ver):
     return ver.split('.', 1)[1]
 
 
-def get_remote_archive_url(pkg, commit):
+def __meta(pkg):
     from pygift.conf import config
 
     registry = config.data['pkgs']
@@ -24,6 +24,14 @@ def get_remote_archive_url(pkg, commit):
     if not isinstance(meta, dict):
         meta = {'url': meta}
 
+    return meta
+
+
+def get_remote_archive_url(pkg, commit):
+    meta = __meta(pkg)
+    if meta is None:
+        return None
+
     tpl = meta.get('url')
     if tpl is None:
         return None
@@ -32,3 +40,11 @@ def get_remote_archive_url(pkg, commit):
     assert url != tpl, "package spec without {commit} found"
 
     return url, meta.get('sub_dir')
+
+
+def can_be_proxied(pkg):
+    u"""
+    прописан ли у нас этот пакет
+    """
+    meta = __meta(pkg)
+    return meta is None
