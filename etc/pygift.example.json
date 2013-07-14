@@ -1,0 +1,18 @@
+{
+  "cache_dir": "/var/cache/pygift/",
+  "log_dir": "/var/log/pygift/",
+  "url_prefix": "/pygift",
+  "pkgs": {
+      // пример импорта пакетов с github
+      // "django-redisession": "https://github.com/liokm/django-redisession/archive/{commit}.zip",
+
+      // пример импорта пакетов с cgit (фронтэнд к локальному git-хостингу)
+      // "package": "http://cgit.example.org/snapshot/package-{commit}.tar",
+
+      // пример репозитория у которого pip-пакет не в корне
+      // "js-beautify": {
+      //   "url": "https://github.com/einars/js-beautify/archive/{commit}.zip",
+      //   "sub_dir": "python"
+      // },
+  }
+}

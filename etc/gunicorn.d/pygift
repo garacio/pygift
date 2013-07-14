@@ -1,0 +1,8 @@
+CONFIG = {
+    'args': (
+        '--bind=127.0.0.1:11282',
+        '--workers=2',
+        '--timeout=300',
+        'pygift:app',
+    ),
+}
