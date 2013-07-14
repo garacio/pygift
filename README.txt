@@ -1,5 +1,3 @@
-pygift
-
 Нахренакозебаян
 ===============
 
@@ -51,7 +49,8 @@ pygift
 
 1) прописать пакеты и репозитории в /etc/pygift.json
 2) в requirements.txt добавить строчку --index-url=http://pygift.example.org/pygift/simple/
-2a) возможно ещё понадобится строчка --extra-index-url=https://pypi.python.org/simple/
+2a) --extra-index-url в основной pypi прописывать не надо, иначе в него будут идти запросы на ваши внутренние пакеты.
+    ^ pygify сам запроксирует туда необработанные запросы + закэширует всё что можно
 3) прописать в reqs.txt нужные пакеты как package==git.6ae9311329df3ef8986518d15faf96d2c632133e # <- git-ревизия
 4) ...
 5) PROFIT!! aka можно пользоваться pip install -r requirements.txt

@@ -8,7 +8,7 @@ def _file_path(pkg, commit):
     cache_dir = config.data['cache_dir']
     assert re.match('[A-Za-z0-9_\-]+', pkg)
     assert re.match('[0-9a-f]{40}', commit)
-    return os.path.join(cache_dir, pkg, commit + '.tar')
+    return os.path.join(cache_dir, 'patched', pkg, commit + '.tar')
 
 
 def retrieve(pkg, commit):

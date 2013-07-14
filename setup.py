@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name='pygift',
-    version='1',
+    version='2',
     author='Denis Orlikhin',
     author_email='qbikk@ya.ru',
     url='''https://github.com/overplumbum/pygift''',
@@ -18,6 +18,6 @@ setup(
         ('/etc/nginx/sites-available/', [
             'etc/nginx/sites-available/pygift.conf']),
         ('/etc/gunicorn.d/', ['etc/gunicorn.d/pygift']),
-        ('/etc/', ['etc/pygift.json']),
+        ('/etc/', ['etc/pygift.example.json']),
     ]
 )

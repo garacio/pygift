@@ -8,9 +8,10 @@ from logbook import warn, debug
 from logbook.compat import RedirectLoggingHandler
 
 from pygift.conf import config
+from pygift import proxy, tools
 
 
-URL_PREFIX  = '/pygift'
+URL_PREFIX = config.data['url_prefix']
 
 core_log_handler = logbook.RotatingFileHandler(os.path.join(config.data['log_dir'], 'app.log'))
 core_log_handler.push_application()
@@ -28,6 +29,8 @@ def simple_pkg(pkg):
     Но пока как это делать быстро, непонятно :(
     """
     debug("pip asking for {!r} available versions", pkg)
+    if tools.can_be_proxied(pkg):
+        return proxy.simple_pkg(pkg)
     return ''
 
 
@@ -37,6 +40,9 @@ def simple_pkg_ver(pkg, ver):
     pip справшивает где скачать пакет такой-то версии — даём ссылку на самих себя
     """
     from pygift.tools import version_validate
+
+    if tools.can_be_proxied(pkg):
+        return proxy.simple_pkg_ver(pkg, ver)
 
     if not version_validate(ver):
         warn("unsupported version requested: {!r}=={!r}", pkg, ver)
@@ -68,6 +74,9 @@ def simple_pkg_ver_redirect(git, pkg, ver):
     аналогично `simple_pkg_redirect`
     """
     return redirect(request.url + '/', code=301)
+
+
+proxy.setup(app)
 
 
 if __name__ == '__main__':
