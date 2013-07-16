@@ -14,5 +14,11 @@
       //   "url": "https://github.com/einars/js-beautify/archive/{commit}.zip",
       //   "sub_dir": "python"
       // },
+
+      // пример репозитория запросы к которому можно отправлять на мировой pypi если указана обычная версия
+      // "js-beautify": {
+      //   "url": "https://github.com/einars/js-beautify/archive/{commit}.zip",
+      //   "is_public": true
+      // },
   }
 }

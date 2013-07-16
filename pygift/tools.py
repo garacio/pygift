@@ -48,3 +48,8 @@ def can_be_proxied(pkg):
     """
     meta = __meta(pkg)
     return meta is None
+
+
+def is_public(pkg):
+    meta = __meta(pkg) or {}
+    return meta.get("is_public", False)

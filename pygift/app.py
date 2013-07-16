@@ -44,9 +44,14 @@ def simple_pkg_ver(pkg, ver):
     if tools.can_be_proxied(pkg):
         return proxy.simple_pkg_ver(pkg, ver)
 
+    # если пакет публичный - его могут попробовать поставить по обычному номеру версии
     if not version_validate(ver):
-        warn("unsupported version requested: {!r}=={!r}", pkg, ver)
-        return '<!-- unsupported version format --!>'
+        if not tools.is_public(pkg):
+            warn("unsupported version requested: {!r}=={!r}", pkg, ver)
+            return '<!-- unsupported version format --!>'
+        else:
+            debug("unsupported version format, yet public pkg, simulating proxy: {!r}=={!r}", pkg, ver)
+            return proxy.json2simple_pkg_ver(pkg, ver)
 
     url = url_for('pkg_generate', pkg=pkg, ver=ver)
     return '<a href="{url}">{pkg}-{ver}</a>'.format(url=escape(url), pkg=escape(pkg), ver=escape(ver))

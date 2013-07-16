@@ -1,11 +1,12 @@
 # coding: utf-8
+from cgi import escape
 import json
 import os
 import re
 import urllib
 import urllib2
 
-from flask import make_response, request, redirect
+from flask import make_response, request
 from logbook import debug
 
 from pygift.conf import config
@@ -17,8 +18,18 @@ def simple_pkg(pkg):
     t = urllib2.urlopen(
         "https://pypi.python.org/simple/{}/".format(pkg),
         timeout=15).read()
-    t = re.sub(r'(https?)://([a-z_./A-Z0-9\-]+)', URL_PREFIX + r'/world/\1/\2', t)
+    t = _wrap_urls_simple(t)
     return t
+
+
+def _wrap_hrefs(content, host, proto):
+    content = re.sub(r'(href=)(["\'])/([^/"][^"]+)\2', r'\1\2{}/world/{}/{}/\3\2'.format(URL_PREFIX, proto, host), content)
+    content = re.sub(r'(href=)(["\'])(http:|https:|)//([^/]+)/([^\'"]+)\2', r'\1\2{}/world/_\3/\4/\5\2'.format(URL_PREFIX), content)
+    return content
+
+
+def _wrap_urls_simple(t):
+    return re.sub(r'(https?)://([a-z_./A-Z0-9\-]+)', URL_PREFIX + r'/world/\1/\2', t)
 
 
 def simple_pkg_ver(pkg, ver):
@@ -35,8 +46,7 @@ def setup(app):
 
         def post_processing(content):
             host = url.split('/', 1)[0]
-            content = re.sub(r'(href=)(["\'])/([^/"][^"]+)\2', r'\1\2{}/world/{}/{}/\3\2'.format(URL_PREFIX, proto, host), content)
-            content = re.sub(r'(href=)(["\'])(http:|https:|)//([^/]+)/([^\'"]+)\2', r'\1\2{}/world/_\3/\4/\5\2'.format(URL_PREFIX), content)
+            content = _wrap_hrefs(content, host, proto)
             return content
 
         if request.query_string:
@@ -51,7 +61,7 @@ def setup(app):
         return _fetch(request.method, "https", url)
 
 
-def _fetch(method, proto, url, post_processing=None):
+def _fetch(method, proto, url, post_processing=None, content_only=False):
     debug("proxy request: {!r} {!r} {!r}", method, proto, url)
 
     cache_dir = os.path.join(config.data['cache_dir'], 'proxy')
@@ -99,9 +109,43 @@ def _fetch(method, proto, url, post_processing=None):
         content = ''
     if post_processing:
         content = post_processing(content)
+
+    if content_only:
+        return content
+
     resp = make_response(content, meta['code'])
 
     for k, v in meta['headers'].items():
         if k.lower() in ('content-type', 'content-length', 'last-modified'):
             resp.headers[k] = v
     return resp
+
+
+def json2simple_pkg_ver(pkg, ver):
+    def render(content):
+        from urlparse import urlsplit
+
+        d = json.loads(content)
+        out = []
+        urls = [u['url'] for u in d['urls']]
+        urls.append(d['info']['download_url'])
+
+        for url in urls:
+            url = _wrap_urls_simple(url)
+            url = '<a href="{}">{}</a><br/>'.format(escape(url), escape(pkg))
+            out.append(url)
+
+        down_url = d['info'].get('download_url')
+        if down_url:
+            u = urlsplit(down_url)
+            extra = _fetch(request.method, u.scheme, down_url[len(u.scheme) + 3:], content_only=True)
+            extra = _wrap_hrefs(extra, host=u.netloc, proto=u.scheme)
+            out.append(extra)
+
+        return "\n".join(out)
+
+    url = "pypi.python.org/pypi/{}/{}/json".format(pkg, ver)
+    r = _fetch(request.method, "https", url, post_processing=render)
+    r.headers['content-type'] = 'text/html'
+    del r.headers['content-length']
+    return r
